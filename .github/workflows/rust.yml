@@ -11,10 +11,10 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/cache@v2
+    - uses: actions/checkout@v3
+    - uses: actions/cache@v3
       with:
         path: |
           ~/.cargo/bin/
@@ -38,7 +38,7 @@ jobs:
         retention-days: 1
   pre-benchmark:
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     outputs: 
       matrix: ${{ steps.set-days-matrix.outputs.matrix }}
     steps:
@@ -51,15 +51,16 @@ jobs:
             !src/solutions/mod.rs
           FILES: |
             Cargo.lock
-      - id: set-days-matrix
+      - name: Identify days to benchmark
+        id: set-days-matrix
         run: |
           echo $GIT_DIFF
           matrix=`ls input/2022/ | sed -r 's/day([0-9]+).*/\1/g' | jq -sc 'unique'`
           echo "${matrix}"
-          echo "name=matrix::${matrix}" >> $GITHUB_OUTPUT
+          echo "matrix=${matrix}" >> $GITHUB_OUTPUT
   benchmark:
     needs: pre-benchmark
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     continue-on-error: true
     strategy:
       matrix:
