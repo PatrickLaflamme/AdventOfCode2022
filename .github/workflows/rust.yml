@@ -31,7 +31,7 @@ jobs:
         tar -czvf build-artifact.tar.gz target
     - name: Run tests
       run: cargo test --verbose
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v3
       with:
         name: build-artifact
         path: build-artifact.tar.gz
@@ -42,8 +42,8 @@ jobs:
     outputs: 
       matrix: ${{ steps.set-days-matrix.outputs.matrix }}
     steps:
-      - uses: actions/checkout@v2
-      - uses: technote-space/get-diff-action@v5
+      - uses: actions/checkout@v3
+      - uses: technote-space/get-diff-action@v6
         with:
           PATTERNS: |
             input/2022/*.txt
@@ -56,7 +56,7 @@ jobs:
           echo $GIT_DIFF
           matrix=`ls input/2022/ | sed -r 's/day([0-9]+).*/\1/g' | jq -sc 'unique'`
           echo "${matrix}"
-          echo "::set-output name=matrix::${matrix}"
+          echo "name=matrix::${matrix}" >> $GITHUB_OUTPUT
   benchmark:
     needs: pre-benchmark
     runs-on: ubuntu-latest
@@ -66,8 +66,8 @@ jobs:
         day: ${{ fromJSON(needs.pre-benchmark.outputs.matrix) }}
         part: [1, 2]
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/cache@v2
+      - uses: actions/checkout@v3
+      - uses: actions/cache@v3
         with:
           path: |
             ~/.cargo/bin/
@@ -91,7 +91,7 @@ jobs:
           echo "Got runtime $runtime; Humanizing"
           humanized_runtime=`python .utils/humanizeDuration.py ${runtime}`
           echo "humanized $humanized_runtime"
-          echo "::set-output name=time::${humanized_runtime}"
+          echo "name=time::${humanized_runtime}" >> $GITHUB_OUTPUT
       - name: Create Runtime Badge
         id: badge_attempt_1
         continue-on-error: true
