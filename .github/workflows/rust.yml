@@ -37,7 +37,6 @@ jobs:
         path: build-artifact.tar.gz
         retention-days: 1
   pre-benchmark:
-    needs: build
     runs-on: ubuntu-22.04
     outputs: 
       matrix: ${{ steps.set-days-matrix.outputs.matrix }}
@@ -59,7 +58,9 @@ jobs:
           echo "${matrix}"
           echo "matrix=${matrix}" >> $GITHUB_OUTPUT
   benchmark:
-    needs: pre-benchmark
+    needs:
+      - pre-benchmark
+      - build
     runs-on: ubuntu-22.04
     continue-on-error: true
     strategy:
@@ -93,24 +94,16 @@ jobs:
           humanized_runtime=`python .utils/humanizeDuration.py ${runtime}`
           echo "humanized $humanized_runtime"
           echo "name=time::${humanized_runtime}" >> $GITHUB_OUTPUT
-      - name: Create Runtime Badge
-        id: badge_attempt_1
-        continue-on-error: true
-        uses: schneegans/dynamic-badges-action@v1.1.0
+      - uses: Wandalen/wretry.action@v1.0.36
+        name: Create Runtime Badge
+        id: create-badge
         with:
-          auth: ${{ secrets.GIST_SECRET }}
-          gistID: a054aa6c1453da6f3126d12b4d59ff59
-          filename: benchmark-aoc-2022-day-${{ matrix.day }}-part-${{ matrix.part }}.json
-          label: runtime
-          message: ${{ steps.benchmark.outputs.time }}
-          color: informational
-      - name: Create Runtime Badge retry
-        if: steps.badge_attempt_1.outcome=='failure'
-        uses: schneegans/dynamic-badges-action@v1.1.0
-        with:
-          auth: ${{ secrets.GIST_SECRET }}
-          gistID: a054aa6c1453da6f3126d12b4d59ff59
-          filename: benchmark-aoc-2022-day-${{ matrix.day }}-part-${{ matrix.part }}.json
-          label: runtime
-          message: ${{ steps.benchmark.outputs.time }}
-          color: informational
+          action: schneegans/dynamic-badges-action@v1.1.0
+          attempt_limit: 3
+          with: |
+            auth: ${{ secrets.GIST_SECRET }}
+            gistID: a054aa6c1453da6f3126d12b4d59ff59
+            filename: benchmark-aoc-2022-day-${{ matrix.day }}-part-${{ matrix.part }}.json
+            label: runtime
+            message: ${{ steps.benchmark.outputs.time }}
+            color: informational
