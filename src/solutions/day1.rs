@@ -1,6 +1,5 @@
-use aoc_runner_derive::{aoc, aoc_generator};
+use aoc_runner_derive::{aoc};
 use itertools::Itertools;
-use num::Integer;
 
 #[aoc(day1, part1)]
 pub fn solve_part1(raw_input: &str) -> usize {
