@@ -5,7 +5,7 @@ use lazy_static::lazy_static;
 use num::{abs, signum};
 
 lazy_static! {
-    static ref d_map: HashMap<char, (i16, i16)> = HashMap::from([
+    static ref D_MAP: HashMap<char, (i16, i16)> = HashMap::from([
         ('D', (0,-1)),
         ('U', (0,1)),
         ('R', (1,0)),
@@ -14,7 +14,7 @@ lazy_static! {
 }
 
 fn move_head_knot(knot: (i16, i16), direction: &char) -> (i16, i16) {
-    let movement = d_map.get(direction).unwrap();
+    let movement = D_MAP.get(direction).unwrap();
     return (knot.0 + movement.0, knot.1 + movement.1);
 }
 
